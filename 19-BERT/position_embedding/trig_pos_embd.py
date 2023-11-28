@@ -42,7 +42,7 @@ class TrigPosEmbedding(keras.layers.Layer):
         """
         if mode in [self.MODE_EXPAND, self.MODE_CONCAT]:
             if output_dim is None:
-                raise NotImplementedError('`output_dim` is required in `%s` mode' % mode)
+                raise NotImplementedError(f'`output_dim` is required in `{mode}` mode')
             if output_dim % 2 != 0:
                 raise NotImplementedError('It does not make sense to use an odd output dimension: %d' % output_dim)
         self.mode = mode

@@ -50,18 +50,16 @@ for step, (x,y) in enumerate(db):
         # [b, 784] => [b, 10]
         out = network(x, training=True)
         # [b] => [b, 10]
-        y_onehot = tf.one_hot(y, depth=10) 
+        y_onehot = tf.one_hot(y, depth=10)
         # [b]
         loss = tf.reduce_mean(tf.losses.categorical_crossentropy(y_onehot, out, from_logits=True))
 
 
-        loss_regularization = []
-        for p in network.trainable_variables:
-            loss_regularization.append(tf.nn.l2_loss(p))
+        loss_regularization = [tf.nn.l2_loss(p) for p in network.trainable_variables]
         loss_regularization = tf.reduce_sum(tf.stack(loss_regularization))
 
         loss = loss + 0.0001 * loss_regularization
- 
+
 
     grads = tape.gradient(loss, network.trainable_variables)
     optimizer.apply_gradients(zip(grads, network.trainable_variables))

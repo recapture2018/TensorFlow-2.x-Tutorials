@@ -74,7 +74,9 @@ class SeqSelfAttention(keras.layers.Layer):
         elif attention_type == SeqSelfAttention.ATTENTION_TYPE_MUL:
             self.Wa, self.ba = None, None
         else:
-            raise NotImplementedError('No implementation for attention type : ' + attention_type)
+            raise NotImplementedError(
+                f'No implementation for attention type : {attention_type}'
+            )
 
         super(SeqSelfAttention, self).__init__(**kwargs)
 
@@ -111,49 +113,63 @@ class SeqSelfAttention(keras.layers.Layer):
     def _build_additive_attention(self, input_shape):
         feature_dim = input_shape[2]
 
-        self.Wt = self.add_weight(shape=(feature_dim, self.units),
-                                  name='{}_Add_Wt'.format(self.name),
-                                  initializer=self.kernel_initializer,
-                                  regularizer=self.kernel_regularizer,
-                                  constraint=self.kernel_constraint)
-        self.Wx = self.add_weight(shape=(feature_dim, self.units),
-                                  name='{}_Add_Wx'.format(self.name),
-                                  initializer=self.kernel_initializer,
-                                  regularizer=self.kernel_regularizer,
-                                  constraint=self.kernel_constraint)
+        self.Wt = self.add_weight(
+            shape=(feature_dim, self.units),
+            name=f'{self.name}_Add_Wt',
+            initializer=self.kernel_initializer,
+            regularizer=self.kernel_regularizer,
+            constraint=self.kernel_constraint,
+        )
+        self.Wx = self.add_weight(
+            shape=(feature_dim, self.units),
+            name=f'{self.name}_Add_Wx',
+            initializer=self.kernel_initializer,
+            regularizer=self.kernel_regularizer,
+            constraint=self.kernel_constraint,
+        )
         if self.use_additive_bias:
-            self.bh = self.add_weight(shape=(self.units,),
-                                      name='{}_Add_bh'.format(self.name),
-                                      initializer=self.bias_initializer,
-                                      regularizer=self.bias_regularizer,
-                                      constraint=self.bias_constraint)
+            self.bh = self.add_weight(
+                shape=(self.units,),
+                name=f'{self.name}_Add_bh',
+                initializer=self.bias_initializer,
+                regularizer=self.bias_regularizer,
+                constraint=self.bias_constraint,
+            )
 
-        self.Wa = self.add_weight(shape=(self.units, 1),
-                                  name='{}_Add_Wa'.format(self.name),
-                                  initializer=self.kernel_initializer,
-                                  regularizer=self.kernel_regularizer,
-                                  constraint=self.kernel_constraint)
+        self.Wa = self.add_weight(
+            shape=(self.units, 1),
+            name=f'{self.name}_Add_Wa',
+            initializer=self.kernel_initializer,
+            regularizer=self.kernel_regularizer,
+            constraint=self.kernel_constraint,
+        )
         if self.use_attention_bias:
-            self.ba = self.add_weight(shape=(1,),
-                                      name='{}_Add_ba'.format(self.name),
-                                      initializer=self.bias_initializer,
-                                      regularizer=self.bias_regularizer,
-                                      constraint=self.bias_constraint)
+            self.ba = self.add_weight(
+                shape=(1,),
+                name=f'{self.name}_Add_ba',
+                initializer=self.bias_initializer,
+                regularizer=self.bias_regularizer,
+                constraint=self.bias_constraint,
+            )
 
     def _build_multiplicative_attention(self, input_shape):
         feature_dim = input_shape[2]
 
-        self.Wa = self.add_weight(shape=(feature_dim, feature_dim),
-                                  name='{}_Mul_Wa'.format(self.name),
-                                  initializer=self.kernel_initializer,
-                                  regularizer=self.kernel_regularizer,
-                                  constraint=self.kernel_constraint)
+        self.Wa = self.add_weight(
+            shape=(feature_dim, feature_dim),
+            name=f'{self.name}_Mul_Wa',
+            initializer=self.kernel_initializer,
+            regularizer=self.kernel_regularizer,
+            constraint=self.kernel_constraint,
+        )
         if self.use_attention_bias:
-            self.ba = self.add_weight(shape=(1,),
-                                      name='{}_Mul_ba'.format(self.name),
-                                      initializer=self.bias_initializer,
-                                      regularizer=self.bias_regularizer,
-                                      constraint=self.bias_constraint)
+            self.ba = self.add_weight(
+                shape=(1,),
+                name=f'{self.name}_Mul_ba',
+                initializer=self.bias_initializer,
+                regularizer=self.bias_regularizer,
+                constraint=self.bias_constraint,
+            )
 
     def call(self, inputs, mask=None, **kwargs):
         input_len = K.shape(inputs)[1]
@@ -189,9 +205,7 @@ class SeqSelfAttention(keras.layers.Layer):
         if self.attention_regularizer_weight > 0.0:
             self.add_loss(self._attention_regularizer(a))
 
-        if self.return_attention:
-            return [v, a]
-        return v
+        return [v, a] if self.return_attention else v
 
     def _call_additive_emission(self, inputs):
         input_shape = K.shape(inputs)
@@ -201,17 +215,14 @@ class SeqSelfAttention(keras.layers.Layer):
         q, k = K.dot(inputs, self.Wt), K.dot(inputs, self.Wx)
         q = K.tile(K.expand_dims(q, 2), [1, 1, input_len, 1])
         k = K.tile(K.expand_dims(k, 1), [1, input_len, 1, 1])
-        if self.use_additive_bias:
-            h = K.tanh(q + k + self.bh)
-        else:
-            h = K.tanh(q + k)
-
-        # e_{t, t'} = W_a h_{t, t'} + b_a
-        if self.use_attention_bias:
-            e = K.reshape(K.dot(h, self.Wa) + self.ba, (batch_size, input_len, input_len))
-        else:
-            e = K.reshape(K.dot(h, self.Wa), (batch_size, input_len, input_len))
-        return e
+        h = K.tanh(q + k + self.bh) if self.use_additive_bias else K.tanh(q + k)
+        return (
+            K.reshape(
+                K.dot(h, self.Wa) + self.ba, (batch_size, input_len, input_len)
+            )
+            if self.use_attention_bias
+            else K.reshape(K.dot(h, self.Wa), (batch_size, input_len, input_len))
+        )
 
     def _call_multiplicative_emission(self, inputs):
         # e_{t, t'} = x_t^T W_a x_{t'} + b_a
@@ -234,9 +245,7 @@ class SeqSelfAttention(keras.layers.Layer):
     def compute_mask(self, inputs, mask=None):
         if isinstance(inputs, list):
             mask = mask[1]
-        if self.return_attention:
-            return [mask, None]
-        return mask
+        return [mask, None] if self.return_attention else mask
 
     def _attention_regularizer(self, attention):
         batch_size = K.cast(K.shape(attention)[0], K.floatx())

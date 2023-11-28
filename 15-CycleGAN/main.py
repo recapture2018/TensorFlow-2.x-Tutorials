@@ -54,14 +54,18 @@ def load_image(image_file):
     return image
 
 
-train_datasetA = tf.data.Dataset.list_files(PATH + 'trainA/*.jpg', shuffle=False)
+train_datasetA = tf.data.Dataset.list_files(
+    f'{PATH}trainA/*.jpg', shuffle=False
+)
 train_datasetA = train_datasetA.shuffle(trainA_size).repeat(epochs)
 train_datasetA = train_datasetA.map(lambda x: load_image(x))
 train_datasetA = train_datasetA.batch(batch_size)
 train_datasetA = train_datasetA.prefetch(batch_size)
 train_datasetA = iter(train_datasetA)
 
-train_datasetB = tf.data.Dataset.list_files(PATH + 'trainB/*.jpg', shuffle=False)
+train_datasetB = tf.data.Dataset.list_files(
+    f'{PATH}trainB/*.jpg', shuffle=False
+)
 train_datasetB = train_datasetB.shuffle(trainB_size).repeat(epochs)
 train_datasetB = train_datasetB.map(lambda x: load_image(x))
 train_datasetB = train_datasetB.batch(batch_size)
@@ -169,7 +173,7 @@ def train(train_datasetA, train_datasetB, epochs, lsgan=True, cyc_lambda=10):
         if epoch % 40 == 0:
             generate_images(trainA, trainB, genB2A_output, genA2B_output, epoch)
 
-            print('Time taken for epoch {} is {} sec'.format(epoch + 1, time.time() - start))
+            print(f'Time taken for epoch {epoch + 1} is {time.time() - start} sec')
 
 
 

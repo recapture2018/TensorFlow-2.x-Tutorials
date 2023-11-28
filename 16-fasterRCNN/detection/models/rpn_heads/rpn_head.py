@@ -218,14 +218,18 @@ class RPNHead(tf.keras.Model):
         rpn_probs = rpn_probs[:, :, 1]
         # [[1216, 1216]]
         pad_shapes = calc_pad_shapes(img_metas)
-        
-        proposals_list = [
+
+        return [
             self._get_proposals_single(
-                rpn_probs[i], rpn_deltas[i], anchors, valid_flags[i], pad_shapes[i], with_probs)
+                rpn_probs[i],
+                rpn_deltas[i],
+                anchors,
+                valid_flags[i],
+                pad_shapes[i],
+                with_probs,
+            )
             for i in range(img_metas.shape[0])
         ]
-        
-        return proposals_list
     
     def _get_proposals_single(self, 
                               rpn_probs, 

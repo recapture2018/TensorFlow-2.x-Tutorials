@@ -44,8 +44,7 @@ class MyDense(layers.Layer):
 
     def call(self, inputs, training=None):
 
-        x = inputs @ self.kernel
-        return x
+        return inputs @ self.kernel
 
 class MyNetwork(keras.Model):
 

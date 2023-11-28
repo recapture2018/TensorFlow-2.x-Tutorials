@@ -67,18 +67,14 @@ def d_loss_fn(generator, discriminator, batch_z, batch_x, is_training):
     d_loss_real = celoss_ones(d_real_logits)
     d_loss_fake = celoss_zeros(d_fake_logits)
 
-    loss = d_loss_fake + d_loss_real
-
-    return loss
+    return d_loss_fake + d_loss_real
 
 
 def g_loss_fn(generator, discriminator, batch_z, is_training):
 
     fake_image = generator(batch_z, is_training)
     d_fake_logits = discriminator(fake_image, is_training)
-    loss = celoss_ones(d_fake_logits)
-
-    return loss
+    return celoss_ones(d_fake_logits)
 
 def main():
 

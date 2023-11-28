@@ -68,12 +68,11 @@ class Conv1D(keras.Model):
             raise NotImplementedError
 
     def call(self, x):
-        if self.rf == 1:
-            size_out = list(x.shape[:-1]) + [self.nf]
-            x = tf.matmul(tf.reshape(x, [-1, x.shape[-1]]), self.w) + self.b
-            x = tf.reshape(x, size_out)
-        else:
+        if self.rf != 1:
             raise NotImplementedError
+        size_out = list(x.shape[:-1]) + [self.nf]
+        x = tf.matmul(tf.reshape(x, [-1, x.shape[-1]]), self.w) + self.b
+        x = tf.reshape(x, size_out)
         return x
 
     
@@ -112,10 +111,7 @@ class Attention(keras.Model):
     def split_heads(self, x, k=False):
         new_x_shape = list(x.shape[:-1]) + [self.n_head, x.shape[-1]//self.n_head]
         x = tf.reshape(x, new_x_shape) # in openai implem: fct split_states
-        if k:
-            return tf.transpose(x, [0,2,3,1])
-        else:
-            return tf.transpose(x, [0,2,1,3])
+        return tf.transpose(x, [0,2,3,1]) if k else tf.transpose(x, [0,2,1,3])
     
     def call(self, x):
         x = self.c_attn(x)
@@ -160,8 +156,7 @@ class Block(keras.Model):
         a = self.attn(x)
         n = self.ln_1(x + a)
         m = self.mlp(n)
-        h = self.ln_2(n + m)
-        return h
+        return self.ln_2(n + m)
 
 
 class TransformerModel(keras.Model):
@@ -199,9 +194,8 @@ class LMHead(keras.Model):
     def call(self, h):
         # Truncated Language modeling logits (we remove the last token)
         h_trunc = tf.reshape(h[:, :-1], [-1, self.n_embd]) \
-            if self.trunc_and_reshape else h  # XD
-        lm_logits = self.decoder(h_trunc)
-        return lm_logits
+                if self.trunc_and_reshape else h  # XD
+        return self.decoder(h_trunc)
 
 
 class MultipleChoiceHead(keras.Model):
@@ -255,9 +249,7 @@ class ClfHead(keras.Model):
         clf_h = clf_h[flat == self.clf_token, :]
         clf_h = tf.boolean_mask(clf_h, tf.equal(flat, self.clf_token))
         clf_h = self.dropout(clf_h)
-        clf_logits = self.linear(clf_h)
-
-        return clf_logits
+        return self.linear(clf_h)
 
 
 class SimilarityHead(keras.Model):
@@ -279,9 +271,7 @@ class SimilarityHead(keras.Model):
         sim_h = tf.boolean_mask(sim_h, tf.equal(flat, self.clf_token))
         sim_h = self.dropout(sim_h)
         sim_h = tf.reduce_sum(sim_h, 1)
-        sim_logits = self.linear(sim_h)
-
-        return sim_logits
+        return self.linear(sim_h)
 
 
 class LMModel(keras.Model):

@@ -103,9 +103,7 @@ def g_loss_fn(generator, discriminator, batch_z, is_training):
 
     fake_image = generator(batch_z, is_training)
     d_fake_logits = discriminator(fake_image, is_training)
-    loss = celoss_ones(d_fake_logits)
-
-    return loss
+    return celoss_ones(d_fake_logits)
 
 def main():
 

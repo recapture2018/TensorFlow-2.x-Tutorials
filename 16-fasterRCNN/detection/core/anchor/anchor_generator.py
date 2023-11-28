@@ -139,12 +139,12 @@ class AnchorGenerator:
         scale = self.scales[level]
         ratios = self.ratios
         feature_stride = self.feature_strides[level]
-        
+
         # Get all combinations of scales and ratios
         scales, ratios = tf.meshgrid([float(scale)], ratios)
         scales = tf.reshape(scales, [-1]) # [32, 32, 32]
         ratios = tf.reshape(ratios, [-1]) # [0.5, 1, 2]
-        
+
         # Enumerate heights and widths from scales and ratios
         heights = scales / tf.sqrt(ratios) # [45, 32, 22], square root
         widths = scales * tf.sqrt(ratios)  # [22, 32, 45]
@@ -152,7 +152,7 @@ class AnchorGenerator:
         # Enumerate shifts in feature space, [0, 4, ..., 1216-4]
         shifts_y = tf.multiply(tf.range(feature_shape[0]), feature_stride)
         shifts_x = tf.multiply(tf.range(feature_shape[1]), feature_stride)
-        
+
         shifts_x, shifts_y = tf.cast(shifts_x, tf.float32), tf.cast(shifts_y, tf.float32)
         shifts_x, shifts_y = tf.meshgrid(shifts_x, shifts_y) # [304, 304, 2] coordinates
 
@@ -164,11 +164,6 @@ class AnchorGenerator:
         box_centers = tf.reshape(tf.stack([box_centers_y, box_centers_x], axis=2), (-1, 2))
         box_sizes = tf.reshape(tf.stack([box_heights, box_widths], axis=2), (-1, 2))
 
-        # Convert to corner coordinates (y1, x1, y2, x2) [304x304, 3, 4] => [277448, 4]
-        boxes = tf.concat([box_centers - 0.5 * box_sizes,
-                           box_centers + 0.5 * box_sizes], axis=1)
-        # print('scale:', scale)
-        # print('ratios:', ratios)
-        # print('pos:', shifts_x.shape, shifts_y.shape)
-        # print('boxes:', boxes.shape)
-        return boxes
+        return tf.concat(
+            [box_centers - 0.5 * box_sizes, box_centers + 0.5 * box_sizes], axis=1
+        )

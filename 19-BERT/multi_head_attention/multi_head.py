@@ -114,13 +114,13 @@ class MultiHead(keras.layers.Wrapper):
         if self.hidden_dim is not None:
             self.W = self.add_weight(
                 shape=(input_shape[-1], self.hidden_dim * self.layer_num),
-                name='{}_W'.format(self.name),
+                name=f'{self.name}_W',
                 initializer=keras.initializers.get('uniform'),
             )
             if self.use_bias:
                 self.b = self.add_weight(
                     shape=(self.hidden_dim * self.layer_num,),
-                    name='{}_b'.format(self.name),
+                    name=f'{self.name}_b',
                     initializer=keras.initializers.get('zeros'),
                 )
             input_shape = input_shape[:-1] + (self.hidden_dim,)

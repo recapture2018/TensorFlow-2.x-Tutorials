@@ -69,37 +69,27 @@ def load_image(image_file, is_train):
     input_image = (input_image / 127.5) - 1
     real_image = (real_image / 127.5) - 1
 
-    # [256, 256, 3], [256, 256, 3]
-    # print(input_image.shape, real_image.shape)
-
-    # => [256, 256, 6]
-    out = tf.concat([input_image, real_image], axis=2)
-
-    return out
+    return tf.concat([input_image, real_image], axis=2)
 
 
 
 
 
-train_dataset = tf.data.Dataset.list_files(PATH+'/train/*.jpg')
+train_dataset = tf.data.Dataset.list_files(f'{PATH}/train/*.jpg')
 # The following snippet can not work, so load it hand by hand.
 # train_dataset = train_dataset.map(lambda x: load_image(x, True)).batch(1)
 train_iter = iter(train_dataset)
-train_data = []
-for x in train_iter:
-    train_data.append(load_image(x, True))
+train_data = [load_image(x, True) for x in train_iter]
 train_data = tf.stack(train_data, axis=0)
 # [800, 256, 256, 3]
 print('train:', train_data.shape)
 train_dataset = tf.data.Dataset.from_tensor_slices(train_data)
 train_dataset = train_dataset.shuffle(400).batch(1)
 
-test_dataset = tf.data.Dataset.list_files(PATH+'test/*.jpg')
+test_dataset = tf.data.Dataset.list_files(f'{PATH}test/*.jpg')
 # test_dataset = test_dataset.map(lambda x: load_image(x, False)).batch(1)
 test_iter = iter(test_dataset)
-test_data = []
-for x in test_iter:
-    test_data.append(load_image(x, False))
+test_data = [load_image(x, False) for x in test_iter]
 test_data = tf.stack(test_data, axis=0)
 # [800, 256, 256, 3]
 print('test:', test_data.shape)
@@ -131,9 +121,7 @@ def discriminator_loss(disc_real_output, disc_generated_output):
     real_loss = tf.reduce_mean(real_loss)
     generated_loss = tf.reduce_mean(generated_loss)
 
-    total_disc_loss = real_loss + generated_loss
-
-    return total_disc_loss
+    return real_loss + generated_loss
 
 
 
@@ -148,9 +136,7 @@ def generator_loss(disc_generated_output, gen_output, target):
 
     gan_loss = tf.reduce_mean(gan_loss)
 
-    total_gen_loss = gan_loss + (LAMBDA * l1_loss)
-
-    return total_gen_loss
+    return gan_loss + (LAMBDA * l1_loss)
 
 
 
@@ -224,7 +210,7 @@ def main():
                 generate_images(generator, input_image, target, epoch)
                 break
 
-        print('Time taken for epoch {} is {} sec\n'.format(epoch + 1, time.time() - start))
+        print(f'Time taken for epoch {epoch + 1} is {time.time() - start} sec\n')
 
 
 

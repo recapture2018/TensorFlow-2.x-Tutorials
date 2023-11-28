@@ -36,11 +36,7 @@ def dot(x, y, sparse=False):
     """
     Wrapper for tf.matmul (sparse vs dense).
     """
-    if sparse:
-        res = tf.sparse.sparse_dense_matmul(x, y)
-    else:
-        res = tf.matmul(x, y)
-    return res
+    return tf.sparse.sparse_dense_matmul(x, y) if sparse else tf.matmul(x, y)
 
 
 
@@ -51,11 +47,7 @@ class Dense(layers.Layer):
                  act=tf.nn.relu, bias=False, featureless=False, **kwargs):
         super(Dense, self).__init__(**kwargs)
 
-        if dropout:
-            self.dropout = placeholders['dropout']
-        else:
-            self.dropout = 0.
-
+        self.dropout = placeholders['dropout'] if dropout else 0.
         self.act = act
         self.sparse_inputs = sparse_inputs
         self.featureless = featureless
@@ -64,7 +56,7 @@ class Dense(layers.Layer):
         # helper variable for sparse dropout
         self.num_features_nonzero = placeholders['num_features_nonzero']
 
-        with tf.variable_scope(self.name + '_vars'):
+        with tf.variable_scope(f'{self.name}_vars'):
             self.vars['weights'] = glorot([input_dim, output_dim],
                                           name='weights')
             if self.bias:
@@ -113,7 +105,7 @@ class GraphConvolution(layers.Layer):
 
         self.weights_ = []
         for i in range(1):
-            w = self.add_variable('weight' + str(i), [input_dim, output_dim])
+            w = self.add_variable(f'weight{str(i)}', [input_dim, output_dim])
             self.weights_.append(w)
         if self.bias:
             self.bias = self.add_variable('bias', [output_dim])
@@ -135,7 +127,7 @@ class GraphConvolution(layers.Layer):
 
 
         # convolve
-        supports = list()
+        supports = []
         for i in range(len(support_)):
             if not self.featureless: # if it has features x
                 pre_sup = dot(x, self.weights_[i], sparse=self.is_sparse_inputs)

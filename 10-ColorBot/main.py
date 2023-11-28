@@ -114,7 +114,7 @@ def main():
 
         plt.imshow(data)
         plt.title(color_name)
-        plt.savefig(color_name+'.png')
+        plt.savefig(f'{color_name}.png')
 
 
 if __name__ == "__main__":

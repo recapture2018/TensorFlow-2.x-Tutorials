@@ -15,33 +15,48 @@ class _Bottleneck(tf.keras.Model):
         super(_Bottleneck, self).__init__(**kwargs)
 
         filters1, filters2, filters3 = filters
-        conv_name_base = 'res' + block + '_branch'
-        bn_name_base   = 'bn'  + block + '_branch'
+        conv_name_base = f'res{block}_branch'
+        bn_name_base = f'bn{block}_branch'
 
         self.downsampling = downsampling
         self.stride = stride
         self.out_channel = filters3
-        
-        self.conv2a = layers.Conv2D(filters1, (1, 1), strides=(stride, stride),
-                                    kernel_initializer='he_normal',
-                                    name=conv_name_base + '2a')
-        self.bn2a = layers.BatchNormalization(name=bn_name_base + '2a')
 
-        self.conv2b = layers.Conv2D(filters2, (3, 3), padding='same',
-                                    kernel_initializer='he_normal',
-                                    name=conv_name_base + '2b')
-        self.bn2b = layers.BatchNormalization(name=bn_name_base + '2b')
+        self.conv2a = layers.Conv2D(
+            filters1,
+            (1, 1),
+            strides=(stride, stride),
+            kernel_initializer='he_normal',
+            name=f'{conv_name_base}2a',
+        )
+        self.bn2a = layers.BatchNormalization(name=f'{bn_name_base}2a')
 
-        self.conv2c = layers.Conv2D(filters3, (1, 1),
-                                    kernel_initializer='he_normal',
-                                    name=conv_name_base + '2c')
-        self.bn2c = layers.BatchNormalization(name=bn_name_base + '2c')
-         
+        self.conv2b = layers.Conv2D(
+            filters2,
+            (3, 3),
+            padding='same',
+            kernel_initializer='he_normal',
+            name=f'{conv_name_base}2b',
+        )
+        self.bn2b = layers.BatchNormalization(name=f'{bn_name_base}2b')
+
+        self.conv2c = layers.Conv2D(
+            filters3,
+            (1, 1),
+            kernel_initializer='he_normal',
+            name=f'{conv_name_base}2c',
+        )
+        self.bn2c = layers.BatchNormalization(name=f'{bn_name_base}2c')
+
         if self.downsampling:
-            self.conv_shortcut = layers.Conv2D(filters3, (1, 1), strides=(stride, stride),
-                                               kernel_initializer='he_normal',
-                                               name=conv_name_base + '1')
-            self.bn_shortcut = layers.BatchNormalization(name=bn_name_base + '1')     
+            self.conv_shortcut = layers.Conv2D(
+                filters3,
+                (1, 1),
+                strides=(stride, stride),
+                kernel_initializer='he_normal',
+                name=f'{conv_name_base}1',
+            )
+            self.bn_shortcut = layers.BatchNormalization(name=f'{bn_name_base}1')     
     
     def call(self, inputs, training=False):
         x = self.conv2a(inputs)

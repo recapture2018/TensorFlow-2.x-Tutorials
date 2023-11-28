@@ -87,8 +87,7 @@ for epoch in range(100): # iterate db for 10
     # test/evluation
     # [w1, b1, w2, b2, w3, b3]
     total_correct, total_num = 0, 0
-    for step, (x,y) in enumerate(test_db):
-
+    for x, y in test_db:
         # [b, 28, 28] => [b, 28*28]
         x = tf.reshape(x, [-1, 28*28])
 

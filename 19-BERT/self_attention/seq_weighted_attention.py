@@ -24,13 +24,17 @@ class SeqWeightedAttention(keras.layers.Layer):
         return dict(list(base_config.items()) + list(config.items()))
 
     def build(self, input_shape):
-        self.W = self.add_weight(shape=(input_shape[2], 1),
-                                 name='{}_W'.format(self.name),
-                                 initializer=keras.initializers.get('uniform'))
+        self.W = self.add_weight(
+            shape=(input_shape[2], 1),
+            name=f'{self.name}_W',
+            initializer=keras.initializers.get('uniform'),
+        )
         if self.use_bias:
-            self.b = self.add_weight(shape=(1,),
-                                     name='{}_b'.format(self.name),
-                                     initializer=keras.initializers.get('zeros'))
+            self.b = self.add_weight(
+                shape=(1,),
+                name=f'{self.name}_b',
+                initializer=keras.initializers.get('zeros'),
+            )
         super(SeqWeightedAttention, self).build(input_shape)
 
     def call(self, x, mask=None):
@@ -46,9 +50,7 @@ class SeqWeightedAttention(keras.layers.Layer):
         att_weights = ai / (K.sum(ai, axis=1, keepdims=True) + K.epsilon())
         weighted_input = x * K.expand_dims(att_weights)
         result = K.sum(weighted_input, axis=1)
-        if self.return_attention:
-            return [result, att_weights]
-        return result
+        return [result, att_weights] if self.return_attention else result
 
     def compute_output_shape(self, input_shape):
         output_len = input_shape[2]
@@ -57,9 +59,7 @@ class SeqWeightedAttention(keras.layers.Layer):
         return input_shape[0], output_len
 
     def compute_mask(self, _, input_mask=None):
-        if self.return_attention:
-            return [None, None]
-        return None
+        return [None, None] if self.return_attention else None
 
     @staticmethod
     def get_custom_objects():

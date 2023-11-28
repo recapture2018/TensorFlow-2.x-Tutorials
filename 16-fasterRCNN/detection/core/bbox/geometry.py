@@ -25,5 +25,4 @@ def compute_overlaps(boxes1, boxes2):
     union = b1_area + b2_area - intersection
     # 4. Compute IoU and reshape to [boxes1, boxes2]
     iou = intersection / union
-    overlaps = tf.reshape(iou, [tf.shape(boxes1)[0], tf.shape(boxes2)[0]])
-    return overlaps
+    return tf.reshape(iou, [tf.shape(boxes1)[0], tf.shape(boxes2)[0]])

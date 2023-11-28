@@ -58,15 +58,13 @@ def d_loss_fn(generator, discriminator, input_noise, real_image, is_trainig):
 
     d_loss_real = celoss_ones(d_real_logits, smooth=0.1)
     d_loss_fake = celoss_zeros(d_fake_logits, smooth=0.0)
-    loss = d_loss_real + d_loss_fake
-    return loss
+    return d_loss_real + d_loss_fake
 
 
 def g_loss_fn(generator, discriminator, input_noise, is_trainig):
     fake_image = generator(input_noise, is_trainig)
     d_fake_logits = discriminator(fake_image, is_trainig)
-    loss = celoss_ones(d_fake_logits, smooth=0.1)
-    return loss
+    return celoss_ones(d_fake_logits, smooth=0.1)
 
 
 
@@ -92,7 +90,7 @@ def main():
     if not os.path.isdir(assets_dir):
         os.makedirs(assets_dir)
     val_block_size = 10
-    val_size = val_block_size * val_block_size
+    val_size = val_block_size**2
 
     # load mnist data
     (x_train, _), (x_test, _) = keras.datasets.mnist.load_data()

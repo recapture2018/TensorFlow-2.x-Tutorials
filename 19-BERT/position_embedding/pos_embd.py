@@ -97,13 +97,9 @@ class PositionEmbedding(keras.layers.Layer):
 
     def compute_mask(self, inputs, mask=None):
         if self.mode == self.MODE_EXPAND:
-            if self.mask_zero:
-                output_mask = K.not_equal(inputs, self.mask_zero)
-            else:
-                output_mask = None
+            return K.not_equal(inputs, self.mask_zero) if self.mask_zero else None
         else:
-            output_mask = mask
-        return output_mask
+            return mask
 
     def compute_output_shape(self, input_shape):
         if self.mode == self.MODE_EXPAND:

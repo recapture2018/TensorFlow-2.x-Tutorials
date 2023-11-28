@@ -12,9 +12,7 @@ from    tensorflow.keras.callbacks import EarlyStopping
 tf.random.set_seed(22)
 np.random.seed(22)
 assert tf.__version__.startswith('2.')
-# 设置GPU显存按需分配
-gpus = tf.config.experimental.list_physical_devices('GPU') 
-if gpus:
+if gpus := tf.config.experimental.list_physical_devices('GPU'):
   try:
     # Currently, memory growth needs to be the same across GPUs
     for gpu in gpus:
@@ -24,7 +22,7 @@ if gpus:
   except RuntimeError as e:
     # Memory growth must be set before GPUs have been initialized
     print(e)
-    
+
 
 from    pokemon import load_pokemon, normalize, denormalize
 from    resnet import ResNet

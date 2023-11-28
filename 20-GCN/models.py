@@ -67,18 +67,16 @@ class GCN(keras.Model):
         print('output dim:', output_dim)
         print('num_features_nonzero:', num_features_nonzero)
 
-        self.layers_ = []
-        self.layers_.append(GraphConvolution(input_dim=self.input_dim, # 1433
-                                            output_dim=args.hidden1, # 16
-                                            num_features_nonzero=num_features_nonzero,
-                                            activation=tf.nn.relu,
-                                            dropout=args.dropout,
-                                            is_sparse_inputs=True))
-
-
-
-
-
+        self.layers_ = [
+            GraphConvolution(
+                input_dim=self.input_dim,
+                output_dim=args.hidden1,
+                num_features_nonzero=num_features_nonzero,
+                activation=tf.nn.relu,
+                dropout=args.dropout,
+                is_sparse_inputs=True,
+            )
+        ]
         self.layers_.append(GraphConvolution(input_dim=args.hidden1, # 16
                                             output_dim=self.output_dim, # 7
                                             num_features_nonzero=num_features_nonzero,

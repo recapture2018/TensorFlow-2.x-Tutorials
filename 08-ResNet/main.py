@@ -98,10 +98,7 @@ class ResNet(keras.Model):
                 if block_id != 0 and layer_id == 0:
                     block = ResnetBlock(self.out_channels, strides=2, residual_path=True)
                 else:
-                    if self.in_channels != self.out_channels:
-                        residual_path = True
-                    else:
-                        residual_path = False
+                    residual_path = self.in_channels != self.out_channels
                     block = ResnetBlock(self.out_channels, residual_path=residual_path)
 
                 self.in_channels = self.out_channels

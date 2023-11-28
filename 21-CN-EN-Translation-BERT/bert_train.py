@@ -6,8 +6,7 @@ import  matplotlib.pyplot as plt
 import  os
 
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
-gpus = tf.config.experimental.list_physical_devices('GPU')
-if gpus:
+if gpus := tf.config.experimental.list_physical_devices('GPU'):
   try:
     # Currently, memory growth needs to be the same across GPUs
     for gpu in gpus:
@@ -132,31 +131,30 @@ translator = Translator(tokenizer_zh, tokenizer_en, transformer, MAX_SEQ_LENGTH)
 
 for epoch in range(4):
 
-    res = translator.do('虽然继承了祖荫，但朴槿惠已经证明了自己是个机敏而老练的政治家。')
+  res = translator.do('虽然继承了祖荫，但朴槿惠已经证明了自己是个机敏而老练的政治家。')
 
 
-    start = time.time()
+  start = time.time()
 
-    train_loss.reset_states()
-    train_accuracy.reset_states()
+  train_loss.reset_states()
+  train_accuracy.reset_states()
 
-    # inp -> chinese, tar -> english
-    for (batch, (inp, tar)) in enumerate(train_dataset):
-        train_step(inp, tar)
+  # inp -> chinese, tar -> english
+  for (batch, (inp, tar)) in enumerate(train_dataset):
+      train_step(inp, tar)
 
-        if batch % 500 == 0:
-            print('Epoch {} Batch {} Loss {:.4f} Accuracy {:.4f}'.format(
-                epoch + 1, batch, train_loss.result(), train_accuracy.result()))
+      if batch % 500 == 0:
+          print('Epoch {} Batch {} Loss {:.4f} Accuracy {:.4f}'.format(
+              epoch + 1, batch, train_loss.result(), train_accuracy.result()))
 
-    if (epoch + 1) % 1 == 0:
-        ckpt_save_path = ckpt_manager.save()
-        print('Saving checkpoint for epoch {} at {}'.format(epoch + 1,
-                                                            ckpt_save_path))
+  if (epoch + 1) % 1 == 0:
+    ckpt_save_path = ckpt_manager.save()
+    print(f'Saving checkpoint for epoch {epoch + 1} at {ckpt_save_path}')
 
-    print('Epoch {} Loss {:.4f} Accuracy {:.4f}'.format(epoch + 1,
-                                                        train_loss.result(),
-                                                        train_accuracy.result()))
+  print('Epoch {} Loss {:.4f} Accuracy {:.4f}'.format(epoch + 1,
+                                                      train_loss.result(),
+                                                      train_accuracy.result()))
 
-    print('Time taken for 1 epoch: {} secs\n'.format(time.time() - start))
+  print(f'Time taken for 1 epoch: {time.time() - start} secs\n')
 
 

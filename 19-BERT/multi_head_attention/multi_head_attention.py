@@ -73,9 +73,7 @@ class MultiHeadAttention(keras.layers.Layer):
         return input_shape
 
     def compute_mask(self, inputs, input_mask=None):
-        if isinstance(input_mask, list):
-            return input_mask[0]
-        return input_mask
+        return input_mask[0] if isinstance(input_mask, list) else input_mask
 
     def build(self, input_shape):
         if isinstance(input_shape, list):
@@ -90,7 +88,7 @@ class MultiHeadAttention(keras.layers.Layer):
             initializer=self.kernel_initializer,
             regularizer=self.kernel_regularizer,
             constraint=self.kernel_constraint,
-            name='%s_Wq' % self.name,
+            name=f'{self.name}_Wq',
         )
         if self.use_bias:
             self.bq = self.add_weight(
@@ -98,14 +96,14 @@ class MultiHeadAttention(keras.layers.Layer):
                 initializer=self.bias_initializer,
                 regularizer=self.bias_regularizer,
                 constraint=self.bias_constraint,
-                name='%s_bq' % self.name,
+                name=f'{self.name}_bq',
             )
         self.Wk = self.add_weight(
             shape=(k[-1], feature_dim),
             initializer=self.kernel_initializer,
             regularizer=self.kernel_regularizer,
             constraint=self.kernel_constraint,
-            name='%s_Wk' % self.name,
+            name=f'{self.name}_Wk',
         )
         if self.use_bias:
             self.bk = self.add_weight(
@@ -113,14 +111,14 @@ class MultiHeadAttention(keras.layers.Layer):
                 initializer=self.bias_initializer,
                 regularizer=self.bias_regularizer,
                 constraint=self.bias_constraint,
-                name='%s_bk' % self.name,
+                name=f'{self.name}_bk',
             )
         self.Wv = self.add_weight(
             shape=(v[-1], feature_dim),
             initializer=self.kernel_initializer,
             regularizer=self.kernel_regularizer,
             constraint=self.kernel_constraint,
-            name='%s_Wv' % self.name,
+            name=f'{self.name}_Wv',
         )
         if self.use_bias:
             self.bv = self.add_weight(
@@ -128,14 +126,14 @@ class MultiHeadAttention(keras.layers.Layer):
                 initializer=self.bias_initializer,
                 regularizer=self.bias_regularizer,
                 constraint=self.bias_constraint,
-                name='%s_bv' % self.name,
+                name=f'{self.name}_bv',
             )
         self.Wo = self.add_weight(
             shape=(feature_dim, feature_dim),
             initializer=self.kernel_initializer,
             regularizer=self.kernel_regularizer,
             constraint=self.kernel_constraint,
-            name='%s_Wo' % self.name,
+            name=f'{self.name}_Wo',
         )
         if self.use_bias:
             self.bo = self.add_weight(
@@ -143,7 +141,7 @@ class MultiHeadAttention(keras.layers.Layer):
                 initializer=self.bias_initializer,
                 regularizer=self.bias_regularizer,
                 constraint=self.bias_constraint,
-                name='%s_bo' % self.name,
+                name=f'{self.name}_bo',
             )
         super(MultiHeadAttention, self).build(input_shape)
 
@@ -194,8 +192,7 @@ class MultiHeadAttention(keras.layers.Layer):
             k = self.activation(k)
             v = self.activation(v)
         y = ScaledDotProductAttention(
-            history_only=self.history_only,
-            name='%s-Attention' % self.name,
+            history_only=self.history_only, name=f'{self.name}-Attention'
         )(
             inputs=[
                 self._reshape_to_batches(q, self.head_num),

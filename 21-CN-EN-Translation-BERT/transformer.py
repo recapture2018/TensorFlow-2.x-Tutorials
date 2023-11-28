@@ -79,8 +79,8 @@ class Decoder(tf.keras.layers.Layer):
             x, block1, block2 = self.dec_layers[i](x, enc_output, training,
                                                    look_ahead_mask, padding_mask)
 
-            attention_weights['decoder_layer{}_block1'.format(i + 1)] = block1
-            attention_weights['decoder_layer{}_block2'.format(i + 1)] = block2
+            attention_weights[f'decoder_layer{i + 1}_block1'] = block1
+            attention_weights[f'decoder_layer{i + 1}_block2'] = block2
 
         # x.shape == (batch_size, target_seq_len, d_model)
         return x, attention_weights

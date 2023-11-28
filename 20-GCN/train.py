@@ -49,7 +49,7 @@ elif args.model == 'dense':
     num_supports = 1
     model_func = MLP
 else:
-    raise ValueError('Invalid argument for model: ' + str(args.model))
+    raise ValueError(f'Invalid argument for model: {str(args.model)}')
 
 
 

@@ -108,7 +108,7 @@ MODEL_DIR = '/tmp/tensorflow/mnist'
 
 def apply_clean():
     if tf.io.gfile.exists(MODEL_DIR):
-        print('Removing existing model dir: {}'.format(MODEL_DIR))
+        print(f'Removing existing model dir: {MODEL_DIR}')
         tf.io.gfile.rmtree(MODEL_DIR)
 
 
@@ -129,8 +129,9 @@ for i in range(NUM_TRAIN_EPOCHS):
     #   with train_summary_writer.as_default():
     train(model, optimizer, train_ds, log_freq=500)
     end = time.time()
-    print('Train time for epoch #{} ({} total steps): {}'.format(
-        i + 1, int(optimizer.iterations), end - start))
+    print(
+        f'Train time for epoch #{i + 1} ({int(optimizer.iterations)} total steps): {end - start}'
+    )
     #   with test_summary_writer.as_default():
     #     test(model, test_ds, optimizer.iterations)
     checkpoint.save(checkpoint_prefix)

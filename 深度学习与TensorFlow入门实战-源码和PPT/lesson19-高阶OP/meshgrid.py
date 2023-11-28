@@ -9,9 +9,7 @@ def func(x):
     :param x: [b, 2]
     :return:
     """
-    z = tf.math.sin(x[...,0]) + tf.math.sin(x[...,1])
-
-    return z
+    return tf.math.sin(x[...,0]) + tf.math.sin(x[...,1])
 
 
 x = tf.linspace(0., 2*3.14, 500)

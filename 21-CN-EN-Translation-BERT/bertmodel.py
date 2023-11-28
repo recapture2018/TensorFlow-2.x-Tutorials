@@ -57,8 +57,8 @@ class Decoder(tf.keras.layers.Layer):
             x, block1, block2 = self.dec_layers[i](x, enc_output, training,
                                                    look_ahead_mask, padding_mask)
 
-            attention_weights['decoder_layer{}_block1'.format(i + 1)] = block1
-            attention_weights['decoder_layer{}_block2'.format(i + 1)] = block2
+            attention_weights[f'decoder_layer{i + 1}_block1'] = block1
+            attention_weights[f'decoder_layer{i + 1}_block2'] = block2
 
         # x.shape == (batch_size, target_seq_len, d_model)
         return x, attention_weights
@@ -84,7 +84,9 @@ class Transformer(tf.keras.Model):
 
     def load_stock_weights(self, bert: BertModelLayer, ckpt_file):
         assert isinstance(bert, BertModelLayer), "Expecting a BertModelLayer instance as first argument"
-        assert tf.compat.v1.train.checkpoint_exists(ckpt_file), "Checkpoint does not exist: {}".format(ckpt_file)
+        assert tf.compat.v1.train.checkpoint_exists(
+            ckpt_file
+        ), f"Checkpoint does not exist: {ckpt_file}"
         ckpt_reader = tf.train.load_checkpoint(ckpt_file)
 
         bert_prefix = 'transformer/bert'
@@ -92,15 +94,16 @@ class Transformer(tf.keras.Model):
         weights = []
         for weight in bert.weights:
             stock_name = map_to_stock_variable_name(weight.name, bert_prefix)
-            if ckpt_reader.has_tensor(stock_name):
-                value = ckpt_reader.get_tensor(stock_name)
-                weights.append(value)
-            else:
-                raise ValueError("No value for:[{}], i.e.:[{}] in:[{}]".format(
-                    weight.name, stock_name, ckpt_file))
+            if not ckpt_reader.has_tensor(stock_name):
+                raise ValueError(
+                    f"No value for:[{weight.name}], i.e.:[{stock_name}] in:[{ckpt_file}]"
+                )
+            value = ckpt_reader.get_tensor(stock_name)
+            weights.append(value)
         bert.set_weights(weights)
-        print("Done loading {} BERT weights from: {} into {} (prefix:{})".format(
-            len(weights), ckpt_file, bert, bert_prefix))
+        print(
+            f"Done loading {len(weights)} BERT weights from: {ckpt_file} into {bert} (prefix:{bert_prefix})"
+        )
 
     def restore_encoder(self, bert_ckpt_file):
         # loading the original pre-trained weights into the BERT layer:

@@ -70,10 +70,7 @@ class AE(tf.keras.Model):
     def call(self, inputs, training=None, mask=None):
         # encoder
         h = self.encode(inputs)
-        # decode
-        x_reconstructed_logits = self.decode_logits(h)
-
-        return x_reconstructed_logits
+        return self.decode_logits(h)
 
 
 model = AE()

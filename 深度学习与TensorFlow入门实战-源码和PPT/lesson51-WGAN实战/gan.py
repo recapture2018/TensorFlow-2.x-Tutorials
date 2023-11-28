@@ -65,10 +65,7 @@ class Discriminator(keras.Model):
 
         # [b, h, w, c] => [b, -1]
         x = self.flatten(x)
-        # [b, -1] => [b, 1]
-        logits = self.fc(x)
-
-        return logits
+        return self.fc(x)
 
 def main():
 

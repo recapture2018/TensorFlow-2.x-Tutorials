@@ -28,9 +28,9 @@ class CocoDataSet(object):
         
         if subset not in ['train', 'val']:
             raise AssertionError('subset must be "train" or "val".')
-            
 
-        self.coco = COCO("{}/annotations/instances_{}2017.json".format(dataset_dir, subset))
+
+        self.coco = COCO(f"{dataset_dir}/annotations/instances_{subset}2017.json")
 
         # get the mapping from original category ids to labels
         self.cat_ids = self.coco.getCatIds()
@@ -38,23 +38,23 @@ class CocoDataSet(object):
             cat_id: i + 1
             for i, cat_id in enumerate(self.cat_ids)
         }
-        
+
         self.img_ids, self.img_infos = self._filter_imgs()
-        
+
         if debug:
             self.img_ids, self.img_infos = self.img_ids[:50], self.img_infos[:50]
-            
-        self.image_dir = "{}/{}2017".format(dataset_dir, subset)
-        
+
+        self.image_dir = f"{dataset_dir}/{subset}2017"
+
         self.flip_ratio = flip_ratio
-        
+
         if pad_mode in ['fixed', 'non-fixed']:
             self.pad_mode = pad_mode
         elif subset == 'train':
             self.pad_mode = 'fixed'
         else:
             self.pad_mode = 'non-fixed'
-        
+
         self.img_transform = transforms.ImageTransform(scale, mean, std, pad_mode)
         self.bbox_transform = transforms.BboxTransform()
         
@@ -67,17 +67,17 @@ class CocoDataSet(object):
             min_size: the minimal size of the image.
         '''
         # Filter images without ground truths.
-        all_img_ids = list(set([_['image_id'] for _ in self.coco.anns.values()]))
+        all_img_ids = list({_['image_id'] for _ in self.coco.anns.values()})
         # Filter images too small.
         img_ids = []
         img_infos = []
         for i in all_img_ids:
             info = self.coco.loadImgs(i)[0]
-            
+
             ann_ids = self.coco.getAnnIds(imgIds=i)
             ann_info = self.coco.loadAnns(ann_ids)
             ann = self._parse_ann_info(ann_info)
-            
+
             if min(info['width'], info['height']) >= min_size and ann['labels'].shape[0] != 0:
                 img_ids.append(i)
                 img_infos.append(info)
@@ -86,8 +86,7 @@ class CocoDataSet(object):
     def _load_ann_info(self, idx):
         img_id = self.img_ids[idx]
         ann_ids = self.coco.getAnnIds(imgIds=img_id)
-        ann_info = self.coco.loadAnns(ann_ids)
-        return ann_info
+        return self.coco.loadAnns(ann_ids)
 
     def _parse_ann_info(self, ann_info):
         '''Parse bbox annotation.
@@ -130,11 +129,9 @@ class CocoDataSet(object):
         else:
             gt_bboxes_ignore = np.zeros((0, 4), dtype=np.float32)
 
-        ann = dict(
-            bboxes=gt_bboxes, labels=gt_labels, bboxes_ignore=gt_bboxes_ignore)
-
-
-        return ann
+        return dict(
+            bboxes=gt_bboxes, labels=gt_labels, bboxes_ignore=gt_bboxes_ignore
+        )
     
     def __len__(self):
         return len(self.img_infos)
@@ -153,29 +150,29 @@ class CocoDataSet(object):
         '''
         img_info = self.img_infos[idx]
         ann_info = self._load_ann_info(idx)
-        
+
         # load the image.
         img = cv2.imread(osp.join(self.image_dir, img_info['file_name']), cv2.IMREAD_COLOR)
         img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
-        
+
         ori_shape = img.shape
-        
+
         # Load the annotation.
         ann = self._parse_ann_info(ann_info)
         bboxes = ann['bboxes']
         labels = ann['labels']
-        
-        flip = True if np.random.rand() < self.flip_ratio else False
-        
+
+        flip = np.random.rand() < self.flip_ratio
+
         # Handle the image
         img, img_shape, scale_factor = self.img_transform(img, flip)
 
         pad_shape = img.shape
-        
+
         # Handle the annotation.
         bboxes, labels = self.bbox_transform(
             bboxes, labels, img_shape, scale_factor, flip)
-        
+
         # Handle the meta info.
         img_meta_dict = dict({
             'ori_shape': ori_shape,
@@ -186,7 +183,7 @@ class CocoDataSet(object):
         })
 
         img_meta = utils.compose_image_meta(img_meta_dict)
-        
+
         return img, img_meta, bboxes, labels
     
     def get_categories(self):

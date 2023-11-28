@@ -18,13 +18,13 @@ print('forward in test mode:', net.variables)
 out = net(x, training=True)
 print('forward in train mode(1 step):', net.variables)
 
-for i in range(100):
+for _ in range(100):
     out = net(x, training=True)
 print('forward in train mode(100 steps):', net.variables)
 
 
 optimizer = optimizers.SGD(lr=1e-2)
-for i in range(10):
+for _ in range(10):
     with tf.GradientTape() as tape:
         out = net(x, training=True)
         loss = tf.reduce_mean(tf.pow(out,2)) - 1

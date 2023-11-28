@@ -86,7 +86,7 @@ class Tokenizer(object):
         spaced = ''
         for ch in text:
             if self._is_punctuation(ch) or self._is_cjk_character(ch):
-                spaced += ' ' + ch + ' '
+                spaced += f' {ch} '
             elif self._is_space(ch):
                 spaced += ' '
             elif ord(ch) == 0 or ord(ch) == 0xfffd or self._is_control(ch):
@@ -108,7 +108,7 @@ class Tokenizer(object):
             while stop > start:
                 sub = word[start:stop]
                 if start > 0:
-                    sub = '##' + sub
+                    sub = f'##{sub}'
                 if sub in self._token_dict:
                     break
                 stop -= 1

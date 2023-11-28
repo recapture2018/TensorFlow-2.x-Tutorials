@@ -5,12 +5,10 @@ import numpy as np
 
 # y = wx + b
 def compute_error_for_line_given_points(b, w, points):
-    totalError = 0
-    for i in range(0, len(points)):
-        x = points[i, 0]
-        y = points[i, 1]
-        # computer mean-squared-error
-        totalError += (y - (w * x + b)) ** 2
+    totalError = sum(
+        (points[i, 1] - (w * points[i, 0] + b)) ** 2
+        for i in range(0, len(points))
+    )
     # average loss for each point
     return totalError / float(len(points))
 
@@ -36,7 +34,7 @@ def gradient_descent_runner(points, starting_b, starting_w, learning_rate, num_i
     b = starting_b
     w = starting_w
     # update for several times
-    for i in range(num_iterations):
+    for _ in range(num_iterations):
         b, w = step_gradient(b, w, np.array(points), learning_rate)
     return [b, w]
 

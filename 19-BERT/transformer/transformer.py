@@ -37,19 +37,14 @@ def _wrap_layer(name, input_layer, build_func, dropout_rate=0.0, trainable=True)
     build_output = build_func(input_layer)
     if dropout_rate > 0.0:
         dropout_layer = keras.layers.Dropout(
-            rate=dropout_rate,
-            name='%s-Dropout' % name,
+            rate=dropout_rate, name=f'{name}-Dropout'
         )(build_output)
     else:
         dropout_layer = build_output
     if isinstance(input_layer, list):
         input_layer = input_layer[0]
-    add_layer = keras.layers.Add(name='%s-Add' % name)([input_layer, dropout_layer])
-    normal_layer = LayerNormalization(
-        trainable=trainable,
-        name='%s-Norm' % name,
-    )(add_layer)
-    return normal_layer
+    add_layer = keras.layers.Add(name=f'{name}-Add')([input_layer, dropout_layer])
+    return LayerNormalization(trainable=trainable, name=f'{name}-Norm')(add_layer)
 
 
 def attention_builder(name, head_num, activation, history_only, trainable=True):
@@ -112,8 +107,8 @@ def get_encoder_component(name,
     :param trainable: Whether the layers are trainable.
     :return: Output layer.
     """
-    attention_name = '%s-MultiHeadSelfAttention' % name
-    feed_forward_name = '%s-FeedForward' % name
+    attention_name = f'{name}-MultiHeadSelfAttention'
+    feed_forward_name = f'{name}-FeedForward'
     attention_layer = _wrap_layer(
         name=attention_name,
         input_layer=input_layer,
@@ -127,7 +122,7 @@ def get_encoder_component(name,
         dropout_rate=dropout_rate,
         trainable=trainable,
     )
-    feed_forward_layer = _wrap_layer(
+    return _wrap_layer(
         name=feed_forward_name,
         input_layer=attention_layer,
         build_func=feed_forward_builder(
@@ -139,7 +134,6 @@ def get_encoder_component(name,
         dropout_rate=dropout_rate,
         trainable=trainable,
     )
-    return feed_forward_layer
 
 
 def get_decoder_component(name,
@@ -164,9 +158,9 @@ def get_decoder_component(name,
     :param trainable: Whether the layers are trainable.
     :return: Output layer.
     """
-    self_attention_name = '%s-MultiHeadSelfAttention' % name
-    query_attention_name = '%s-MultiHeadQueryAttention' % name
-    feed_forward_name = '%s-FeedForward' % name
+    self_attention_name = f'{name}-MultiHeadSelfAttention'
+    query_attention_name = f'{name}-MultiHeadQueryAttention'
+    feed_forward_name = f'{name}-FeedForward'
     self_attention_layer = _wrap_layer(
         name=self_attention_name,
         input_layer=input_layer,
@@ -193,7 +187,7 @@ def get_decoder_component(name,
         dropout_rate=dropout_rate,
         trainable=trainable,
     )
-    feed_forward_layer = _wrap_layer(
+    return _wrap_layer(
         name=feed_forward_name,
         input_layer=query_attention_layer,
         build_func=feed_forward_builder(
@@ -205,7 +199,6 @@ def get_decoder_component(name,
         dropout_rate=dropout_rate,
         trainable=trainable,
     )
-    return feed_forward_layer
 
 
 def get_encoders(encoder_num,
@@ -435,7 +428,7 @@ def decode(model, tokens, start_token, end_token, pad_token, max_len=10000, max_
     decoder_inputs = [[start_token] for _ in range(batch_size)]
     outputs = [None for _ in range(batch_size)]
     output_len = 1
-    while len(list(filter(lambda x: x is None, outputs))) > 0:
+    while list(filter(lambda x: x is None, outputs)):
         output_len += 1
         batch_inputs, batch_outputs = [], []
         max_input_len = 0

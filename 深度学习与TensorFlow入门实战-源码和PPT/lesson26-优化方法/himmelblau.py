@@ -34,11 +34,10 @@ for step in range(200):
         tape.watch([x])
         y = himmelblau(x)
 
-    grads = tape.gradient(y, [x])[0] 
+    grads = tape.gradient(y, [x])[0]
     x -= 0.01*grads
 
-    
+
 
     if step % 20 == 0:
-        print ('step {}: x = {}, f(x) = {}'
-               .format(step, x.numpy(), y.numpy()))
+        print(f'step {step}: x = {x.numpy()}, f(x) = {y.numpy()}')

@@ -115,12 +115,15 @@ class BBoxHead(tf.keras.Model):
         '''
         
         pad_shapes = calc_pad_shapes(img_metas)
-        detections_list = [
+        return [
             self._get_bboxes_single(
-                rcnn_probs_list[i], rcnn_deltas_list[i], rois_list[i], pad_shapes[i])
+                rcnn_probs_list[i],
+                rcnn_deltas_list[i],
+                rois_list[i],
+                pad_shapes[i],
+            )
             for i in range(img_metas.shape[0])
-        ]
-        return detections_list  
+        ]  
     
     def _get_bboxes_single(self, rcnn_probs, rcnn_deltas, rois, img_shape):
         '''

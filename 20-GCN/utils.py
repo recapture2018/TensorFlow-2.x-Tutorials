@@ -10,10 +10,7 @@ def parse_index_file(filename):
     """
     Parse index file.
     """
-    index = []
-    for line in open(filename):
-        index.append(int(line.strip()))
-    return index
+    return [int(line.strip()) for line in open(filename)]
 
 
 def sample_mask(idx, l):
@@ -47,15 +44,15 @@ def load_data(dataset_str):
     """
     names = ['x', 'y', 'tx', 'ty', 'allx', 'ally', 'graph']
     objects = []
-    for i in range(len(names)):
-        with open("data/ind.{}.{}".format(dataset_str, names[i]), 'rb') as f:
+    for name in names:
+        with open(f"data/ind.{dataset_str}.{name}", 'rb') as f:
             if sys.version_info > (3, 0):
                 objects.append(pkl.load(f, encoding='latin1'))
             else:
                 objects.append(pkl.load(f))
 
     x, y, tx, ty, allx, ally, graph = tuple(objects)
-    test_idx_reorder = parse_index_file("data/ind.{}.test.index".format(dataset_str))
+    test_idx_reorder = parse_index_file(f"data/ind.{dataset_str}.test.index")
     test_idx_range = np.sort(test_idx_reorder)
 
     if dataset_str == 'citeseer':
@@ -157,7 +154,7 @@ def chebyshev_polynomials(adj, k):
     largest_eigval, _ = eigsh(laplacian, 1, which='LM')
     scaled_laplacian = (2. / largest_eigval[0]) * laplacian - sp.eye(adj.shape[0])
 
-    t_k = list()
+    t_k = []
     t_k.append(sp.eye(adj.shape[0]))
     t_k.append(scaled_laplacian)
 

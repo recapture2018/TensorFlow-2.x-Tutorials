@@ -52,12 +52,10 @@ def load_dataset(data_dir, url, batch_size):
     # row (color_name, r, g, b) followed by comma-separated lines.
     path = maybe_download(os.path.basename(url), data_dir, url)
 
-    # This chain of commands loads our data by:
-    #   1. skipping the header; (.skip(1))
-    #   2. parsing the subsequent lines; (.map(parse))
-    #   3. shuffling the data; (.shuffle(...))
-    #   3. grouping the data into padded batches (.padded_batch(...)).
-    dataset = tf.data.TextLineDataset(path).skip(1).map(parse).shuffle(
-                buffer_size=10000).padded_batch(
-                batch_size, padded_shapes=([None], [None, None], []))
-    return dataset
+    return (
+        tf.data.TextLineDataset(path)
+        .skip(1)
+        .map(parse)
+        .shuffle(buffer_size=10000)
+        .padded_batch(batch_size, padded_shapes=([None], [None, None], []))
+    )

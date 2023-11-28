@@ -35,15 +35,15 @@ class PyramidROIAlign(tf.keras.layers.Layer):
         rois_list, feature_map_list, img_metas = inputs # [2000 ,4], list:[P2, P3, P4, P5]
 
         pad_shapes = calc_pad_shapes(img_metas)
-        
+
         pad_areas = pad_shapes[:, 0] * pad_shapes[:, 1] # 1216*1216
-        
+
         num_rois_list = [rois.shape.as_list()[0] for rois in rois_list] # data:[2000]
         roi_indices = tf.constant(
             [i for i in range(len(rois_list)) for _ in range(rois_list[i].shape.as_list()[0])],
             dtype=tf.int32
         ) #[0.....], shape:[2000]
-        
+
         areas = tf.constant(#              range(1)                               range(2000)
             [pad_areas[i] for i in range(pad_areas.shape[0]) for _ in range(num_rois_list[i])],
             dtype=tf.float32
@@ -51,12 +51,12 @@ class PyramidROIAlign(tf.keras.layers.Layer):
 
 
         rois = tf.concat(rois_list, axis=0) # [2000, 4]
-        
+
         # Assign each ROI to a level in the pyramid based on the ROI area.
         y1, x1, y2, x2 = tf.split(rois, 4, axis=1) # 4 of [2000, 1]
         h = y2 - y1 # [2000, 1]
         w = x2 - x1 # [2000, 1]
-        
+
         # Equation 1 in the Feature Pyramid Networks paper. Account for
         # the fact that our coordinates are normalized here.
         # e.g. a 224x224 ROI (in pixels) maps to P4
@@ -69,7 +69,7 @@ class PyramidROIAlign(tf.keras.layers.Layer):
             2, 4 + tf.cast(tf.round(roi_level), tf.int32)))
         # roi_level will indicates which level of feature to use
 
-        
+
         # Loop through levels and apply ROI pooling to each. P2 to P5.
         pooled_rois = []
         roi_to_level = []
@@ -118,6 +118,4 @@ class PyramidROIAlign(tf.keras.layers.Layer):
             roi_to_level)[0]).indices[::-1]# reverse the order
         ix = tf.gather(roi_to_level[:, 1], ix) # [2000]
         pooled_rois = tf.gather(pooled_rois, ix) # [2000, 7, 7, 256]
-        # 2000 of [7, 7, 256]
-        pooled_rois_list = tf.split(pooled_rois, num_rois_list, axis=0)
-        return pooled_rois_list
+        return tf.split(pooled_rois, num_rois_list, axis=0)

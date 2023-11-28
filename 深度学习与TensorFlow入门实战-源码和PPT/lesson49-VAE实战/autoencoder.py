@@ -70,10 +70,7 @@ class AE(keras.Model):
     def call(self, inputs, training=None):
         # [b, 784] => [b, 10]
         h = self.encoder(inputs)
-        # [b, 10] => [b, 784]
-        x_hat = self.decoder(h)
-
-        return x_hat
+        return self.decoder(h)
 
 
 

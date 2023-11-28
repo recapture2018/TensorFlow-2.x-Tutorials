@@ -118,11 +118,7 @@ def disk_image_batch_dataset(img_paths,
         labels : nested structure of tensors/ndarrays/lists
 
     """
-    if labels is None:
-        memory_data = img_paths
-    else:
-        memory_data = (img_paths, labels)
-
+    memory_data = img_paths if labels is None else (img_paths, labels)
     def parse_fn(path, *label):
         img = tf.io.read_file(path)
         img = tf.image.decode_png(img, 3)  # fix channels to 3

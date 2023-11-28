@@ -83,10 +83,7 @@ class MyRNN(keras.Model):
 
         # out: [b, 64] => [b, 1]
         x = self.outlayer(out1)
-        # p(y is pos|x)
-        prob = tf.sigmoid(x)
-
-        return prob
+        return tf.sigmoid(x)
 
 def main():
     units = 64

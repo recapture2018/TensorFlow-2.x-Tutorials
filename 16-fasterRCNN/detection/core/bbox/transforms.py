@@ -54,26 +54,25 @@ def delta2bbox(box, delta, target_means, target_stds):
         target_means, dtype=tf.float32)
     target_stds = tf.constant(
         target_stds, dtype=tf.float32)
-    delta = delta * target_stds + target_means    
+    delta = delta * target_stds + target_means
     # Convert to y, x, h, w
     height = box[:, 2] - box[:, 0]
     width = box[:, 3] - box[:, 1]
     center_y = box[:, 0] + 0.5 * height
     center_x = box[:, 1] + 0.5 * width
-    
+
     # Apply delta
     center_y += delta[:, 0] * height
     center_x += delta[:, 1] * width
     height *= tf.exp(delta[:, 2])
     width *= tf.exp(delta[:, 3])
-    
+
     # Convert back to y1, x1, y2, x2
     y1 = center_y - 0.5 * height
     x1 = center_x - 0.5 * width
     y2 = y1 + height
     x2 = x1 + width
-    result = tf.stack([y1, x1, y2, x2], axis=1)
-    return result
+    return tf.stack([y1, x1, y2, x2], axis=1)
 
 def bbox_clip(box, window):
     '''
@@ -104,13 +103,11 @@ def bbox_flip(bboxes, width):
         width: Int or Float
     '''
     y1, x1, y2, x2 = tf.split(bboxes, 4, axis=-1)
-    
+
     new_x1 = width - x2
     new_x2 = width - x1
-    
-    flipped = tf.concat([y1, new_x1, y2, new_x2], axis=-1)
-    
-    return flipped
+
+    return tf.concat([y1, new_x1, y2, new_x2], axis=-1)
 
 
 

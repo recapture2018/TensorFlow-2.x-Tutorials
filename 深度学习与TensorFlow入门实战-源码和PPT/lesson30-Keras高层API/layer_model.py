@@ -47,9 +47,7 @@ class MyDense(layers.Layer):
 
 	def call(self, inputs, training=None):
 
-		out = inputs @ self.kernel + self.bias
-
-		return out 
+	    return inputs @ self.kernel + self.bias 
 
 class MyModel(keras.Model):
 

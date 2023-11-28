@@ -53,8 +53,7 @@ def main():
 
     for epoch in range(200):
 
-        for step, (x, y) in enumerate(db_train):
-
+        for x, y in db_train:
             with tf.GradientTape() as tape:
                 # [b, 1]
                 logits = model(x)

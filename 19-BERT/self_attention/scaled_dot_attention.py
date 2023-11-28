@@ -47,9 +47,7 @@ class ScaledDotProductAttention(keras.layers.Layer):
     def compute_mask(self, inputs, mask=None):
         if isinstance(mask, list):
             mask = mask[0]
-        if self.return_attention:
-            return [mask, None]
-        return mask
+        return [mask, None] if self.return_attention else mask
 
     def call(self, inputs, mask=None, **kwargs):
         if isinstance(inputs, list):
@@ -70,6 +68,4 @@ class ScaledDotProductAttention(keras.layers.Layer):
             e *= K.cast(K.expand_dims(mask, axis=-2), K.floatx())
         a = e / (K.sum(e, axis=-1, keepdims=True) + K.epsilon())
         v = K.batch_dot(a, value)
-        if self.return_attention:
-            return [v, a]
-        return v
+        return [v, a] if self.return_attention else v

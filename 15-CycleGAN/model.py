@@ -215,22 +215,13 @@ class Discriminator(keras.Model):
 
 
 def discriminator_loss(disc_of_real_output, disc_of_gen_output, lsgan=True):
-    if lsgan:  # Use least squares loss
-        # real_loss = tf.reduce_mean(tf.squared_difference(disc_of_real_output, 1))
-        real_loss = keras.losses.mean_squared_error(disc_of_real_output, tf.ones_like(disc_of_real_output))
-        generated_loss = tf.reduce_mean(tf.square(disc_of_gen_output))
-
-        total_disc_loss = (real_loss + generated_loss) * 0.5  # 0.5 slows down rate that D learns compared to G
-    else:  # Use vanilla GAN loss
+    if not lsgan:
         raise NotImplementedError
-        real_loss = tf.losses.sigmoid_cross_entropy(multi_class_labels=tf.ones_like(disc_of_real_output),
-                                                    logits=disc_of_real_output)
-        generated_loss = tf.losses.sigmoid_cross_entropy(multi_class_labels=tf.zeros_like(disc_of_gen_output),
-                                                         logits=disc_of_gen_output)
+    # real_loss = tf.reduce_mean(tf.squared_difference(disc_of_real_output, 1))
+    real_loss = keras.losses.mean_squared_error(disc_of_real_output, tf.ones_like(disc_of_real_output))
+    generated_loss = tf.reduce_mean(tf.square(disc_of_gen_output))
 
-        total_disc_loss = real_loss + generated_loss
-
-    return total_disc_loss
+    return (real_loss + generated_loss) * 0.5
 
 
 def generator_loss(disc_of_gen_output, lsgan=True):
@@ -239,9 +230,7 @@ def generator_loss(disc_of_gen_output, lsgan=True):
         gen_loss = keras.losses.mean_squared_error(disc_of_gen_output, tf.ones_like(disc_of_gen_output))
     else:  # Use vanilla GAN loss
         raise NotImplementedError
-        gen_loss = tf.losses.sigmoid_cross_entropy(multi_class_labels=tf.ones_like(disc_generated_output),
-                                                   logits=disc_generated_output)
-        # l1_loss = tf.reduce_mean(tf.abs(target - gen_output)) # Look up pix2pix loss
+            # l1_loss = tf.reduce_mean(tf.abs(target - gen_output)) # Look up pix2pix loss
     return gen_loss
 
 

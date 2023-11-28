@@ -84,8 +84,7 @@ class VAE(keras.Model):
 
         std = tf.exp(log_var)**0.5
 
-        z = mu + std * eps
-        return z
+        return mu + std * eps
 
     def call(self, inputs, training=None):
 

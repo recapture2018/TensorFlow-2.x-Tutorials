@@ -189,15 +189,13 @@ def compose_image_meta(img_meta_dict):
     pad_shape = img_meta_dict['pad_shape']
     scale_factor = img_meta_dict['scale_factor']
     flip = 1 if img_meta_dict['flip'] else 0
-    img_meta = np.array(
-        ori_shape +               # size=3
-        img_shape +               # size=3
-        pad_shape +               # size=3
-        tuple([scale_factor]) +   # size=1
-        tuple([flip])             # size=1
+    return np.array(
+        ori_shape
+        + img_shape  # size=3
+        + pad_shape  # size=3
+        + (scale_factor,)
+        + (flip,)
     ).astype(np.float32)
-
-    return img_meta
 
 def parse_image_meta(img_meta):
     '''Parses an array that contains image attributes to its components.
@@ -210,7 +208,7 @@ def parse_image_meta(img_meta):
     ---
         a dict of the parsed values.
     '''
-    ori_shape = img_meta[0:3]
+    ori_shape = img_meta[:3]
     img_shape = img_meta[3:6]
     pad_shape = img_meta[6:9]
     scale_factor = img_meta[9]

@@ -77,7 +77,7 @@ optimizer = optimizers.Adam(lr=0.01)
 
 
 current_time = datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
-log_dir = 'logs/' + current_time
+log_dir = f'logs/{current_time}'
 summary_writer = tf.summary.create_file_writer(log_dir) 
 
 # get x from (x,y)
@@ -100,7 +100,7 @@ for step, (x,y) in enumerate(db):
         # [b]
         loss = tf.reduce_mean(tf.losses.categorical_crossentropy(y_onehot, out, from_logits=True))
 
- 
+
 
     grads = tape.gradient(loss, network.trainable_variables)
     optimizer.apply_gradients(zip(grads, network.trainable_variables))
@@ -116,13 +116,13 @@ for step, (x,y) in enumerate(db):
     if step % 500 == 0:
         total, total_correct = 0., 0
 
-        for _, (x, y) in enumerate(ds_val):  
+        for x, y in ds_val:
             # [b, 28, 28] => [b, 784]
             x = tf.reshape(x, (-1, 28*28))
             # [b, 784] => [b, 10]
-            out = network(x) 
+            out = network(x)
             # [b, 10] => [b] 
-            pred = tf.argmax(out, axis=1) 
+            pred = tf.argmax(out, axis=1)
             pred = tf.cast(pred, dtype=tf.int32)
             # bool type 
             correct = tf.equal(pred, y)
@@ -132,14 +132,14 @@ for step, (x,y) in enumerate(db):
 
         print(step, 'Evaluate Acc:', total_correct/total)
 
-        
+
         # print(x.shape) 
         val_images = x[:25]
         val_images = tf.reshape(val_images, [-1, 28, 28, 1])
         with summary_writer.as_default():
             tf.summary.scalar('test-acc', float(total_correct/total), step=step)
             tf.summary.image("val-onebyone-images:", val_images, max_outputs=25, step=step)
-            
+
             val_images = tf.reshape(val_images, [-1, 28, 28])
             figure  = image_grid(val_images)
             tf.summary.image('val-images:', plot_to_image(figure), step=step)

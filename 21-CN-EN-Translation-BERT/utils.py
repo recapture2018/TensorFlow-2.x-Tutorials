@@ -49,8 +49,7 @@ def create_padding_mask(seq):
 
 
 def create_look_ahead_mask(size):
-    mask = 1 - tf.linalg.band_part(tf.ones((size, size)), -1, 0)
-    return mask  # (seq_len, seq_len)
+    return 1 - tf.linalg.band_part(tf.ones((size, size)), -1, 0)
 
 
 def create_masks(inp, tar):
